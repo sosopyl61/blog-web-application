@@ -1,4 +1,4 @@
-package com.rymtsou.model;
+package com.rymtsou.model.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
@@ -10,17 +10,17 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.context.annotation.Scope;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 
-@Scope("prototype")
 @Entity(name = "security")
-@Component
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -31,16 +31,18 @@ public class Security {
     @GeneratedValue(generator = "sec_seq_gen")
     private Long id;
     private String login;
-    @JsonIgnore
     private String password;
+
     @Enumerated(EnumType.STRING)
     private Role role;
 
     @JsonIgnore
+    @CreatedDate
     @Column(name = "created", updatable = false)
     private Timestamp created;
 
     @JsonIgnore
+    @LastModifiedDate
     @Column(name = "updated")
     private Timestamp updated;
 

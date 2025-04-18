@@ -1,4 +1,4 @@
-package com.rymtsou.model;
+package com.rymtsou.model.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -7,7 +7,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,23 +18,21 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
-import java.util.List;
 
 @Scope("prototype")
-@Entity(name = "posts")
+@Entity(name = "comments")
 @Component
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class Post {
+public class Comment {
     @Id
-    @SequenceGenerator(name = "post_seq_gen", sequenceName = "posts_id_seq", allocationSize = 1)
-    @GeneratedValue(generator = "post_seq_gen")
+    @SequenceGenerator(name = "comment_seq_gen", sequenceName = "comments_id_seq", allocationSize = 1)
+    @GeneratedValue(generator = "comment_seq_gen")
     private Long id;
-    @Column(nullable = false)
-    private String title;
-    private String content;
+    @Column(name = "comment_text")
+    private String commentText;
 
     @CreatedDate
     @Column(updatable = false)
@@ -45,10 +42,10 @@ public class Post {
     private Timestamp updated;
 
     @ManyToOne
-    @JoinColumn(name = "author_id", nullable = false)
-    private User author;
+    @JoinColumn(name = "comment_author_id", nullable = false)
+    private User comm_author;
 
-    @OneToMany(mappedBy = "post")
-    private List<Comment> comments;
-
+    @ManyToOne
+    @JoinColumn(name = "post_id", nullable = false)
+    private Post post;
 }

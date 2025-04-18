@@ -1,4 +1,4 @@
-package com.rymtsou.model;
+package com.rymtsou.model.domain;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
@@ -9,21 +9,19 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.context.annotation.Scope;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.List;
 
-@Scope("prototype")
 @Entity(name = "users")
-@Component
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -50,11 +48,9 @@ public class User {
     @Column(name = "updated")
     private Timestamp updated;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "author")
     private List<Post> posts;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "comm_author")
     private List<Comment> comments;
 }
