@@ -1,5 +1,6 @@
 package com.rymtsou.service.impl;
 
+import com.rymtsou.model.domain.User;
 import com.rymtsou.model.response.GetUserResponse;
 import com.rymtsou.repository.UserRepository;
 import com.rymtsou.service.UserService;
@@ -20,9 +21,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    @Override
+    public Optional<GetUserResponse> getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .map(user -> GetUserResponse.builder()
+                        .username(user.getUsername())
+                        .firstname(user.getFirstname())
+                        .secondName(user.getSecondName())
+                        .email(user.getEmail())
+                        .age(user.getAge())
+                        .sex(user.getSex())
+                        .build()
+                );
+    }
+
+    @Override
     public Optional<List<GetUserResponse>> getAllUsers() {
         return Optional.of(userRepository.findAll().stream()
                 .map(user -> GetUserResponse.builder()
+                        .username(user.getUsername())
                         .firstname(user.getFirstname())
                         .secondName(user.getSecondName())
                         .email(user.getEmail())
@@ -31,4 +52,5 @@ public class UserServiceImpl implements UserService {
                         .build()
                 ).toList());
     }
+
 }

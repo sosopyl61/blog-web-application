@@ -30,7 +30,8 @@ public class User {
     @SequenceGenerator(name = "user_seq_gen", sequenceName = "users_id_seq", allocationSize = 1)
     @GeneratedValue(generator = "user_seq_gen")
     private Long id;
-
+    @Column(unique = true)
+    private String username;
     private String firstname;
     @Column(name = "second_name")
     private String secondName;
@@ -38,12 +39,10 @@ public class User {
     private Integer age;
     private String sex;
 
-    @JsonIgnore
     @CreatedDate
     @Column(name = "created", updatable = false)
     private Timestamp created;
 
-    @JsonIgnore
     @LastModifiedDate
     @Column(name = "updated")
     private Timestamp updated;

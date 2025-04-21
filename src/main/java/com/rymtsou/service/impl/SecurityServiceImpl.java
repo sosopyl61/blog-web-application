@@ -42,6 +42,7 @@ public class SecurityServiceImpl implements SecurityService {
         }
 
         User user = User.builder()
+                .username(requestDto.getUsername())
                 .firstname(requestDto.getFirstname())
                 .secondName(requestDto.getSecondName())
                 .email(requestDto.getEmail())
@@ -59,11 +60,12 @@ public class SecurityServiceImpl implements SecurityService {
         securityRepository.save(security);
 
         RegistrationResponse responseDto = RegistrationResponse.builder()
-                .firstname(requestDto.getFirstname())
-                .secondName(requestDto.getSecondName())
-                .email(requestDto.getEmail())
-                .age(requestDto.getAge())
-                .sex(requestDto.getSex())
+                .username(userRegistered.getUsername())
+                .firstname(userRegistered.getFirstname())
+                .secondName(userRegistered.getSecondName())
+                .email(userRegistered.getEmail())
+                .age(userRegistered.getAge())
+                .sex(userRegistered.getSex())
                 .build();
 
         return Optional.of(responseDto);

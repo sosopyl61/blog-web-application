@@ -32,16 +32,13 @@ public class Security {
     private Long id;
     private String login;
     private String password;
-
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @JsonIgnore
     @CreatedDate
     @Column(name = "created", updatable = false)
     private Timestamp created;
 
-    @JsonIgnore
     @LastModifiedDate
     @Column(name = "updated")
     private Timestamp updated;
