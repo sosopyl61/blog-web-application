@@ -6,8 +6,11 @@ import com.rymtsou.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -46,8 +49,26 @@ public class UserController {
     public ResponseEntity<List<GetUserResponse>> getAllUsers() {
         Optional<List<GetUserResponse>> users = userService.getAllUsers();
         if (users.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(users.get(), HttpStatus.OK);
+    }
+
+    @PutMapping
+    public ResponseEntity<GetUserResponse> updateUser(@RequestBody User user) {
+        Optional<GetUserResponse> userResponse = userService.updateUser(user);
+        if (userResponse.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity<>(userResponse.get(), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<HttpStatus> deleteUser(@PathVariable Long id) {
+        Boolean result = userService.deleteUser(id);
+        if (!result) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

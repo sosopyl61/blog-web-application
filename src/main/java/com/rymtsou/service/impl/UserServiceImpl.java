@@ -53,4 +53,22 @@ public class UserServiceImpl implements UserService {
                 ).toList());
     }
 
+    @Override
+    public Optional<GetUserResponse> updateUser(User user) {
+        return Optional.of(userRepository.save(user))
+                .map(requestUser -> GetUserResponse.builder()
+                        .username(requestUser.getUsername())
+                        .firstname(requestUser.getFirstname())
+                        .secondName(requestUser.getSecondName())
+                        .email(requestUser.getEmail())
+                        .age(requestUser.getAge())
+                        .sex(requestUser.getSex())
+                        .build());
+    }
+
+    @Override
+    public Boolean deleteUser(Long id) {
+        userRepository.deleteById(id);
+        return !userRepository.existsById(id);
+    }
 }

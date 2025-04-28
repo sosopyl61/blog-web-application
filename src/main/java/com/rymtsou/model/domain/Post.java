@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.context.annotation.Scope;
@@ -24,6 +25,7 @@ import java.util.List;
 @Scope("prototype")
 @Entity(name = "posts")
 @Component
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
