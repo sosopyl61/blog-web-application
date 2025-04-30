@@ -31,5 +31,4 @@ public class SecurityController {
         }
         return new ResponseEntity<>(security.get(), HttpStatus.OK);
     }
-
 }

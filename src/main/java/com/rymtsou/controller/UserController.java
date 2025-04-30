@@ -1,7 +1,10 @@
 package com.rymtsou.controller;
 
 import com.rymtsou.model.domain.User;
-import com.rymtsou.model.response.GetUserResponse;
+import com.rymtsou.model.request.DeleteUserRequestDto;
+import com.rymtsou.model.request.FindUserRequestDto;
+import com.rymtsou.model.request.UpdateUserRequestDto;
+import com.rymtsou.model.response.GetUserResponseDto;
 import com.rymtsou.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -36,9 +39,9 @@ public class UserController {
         return new ResponseEntity<>(user.get(), HttpStatus.OK);
     }
 
-    @GetMapping("/find/{username}")
-    public ResponseEntity<GetUserResponse> getUserByUsername(@PathVariable String username) {
-        Optional<GetUserResponse> user = userService.getUserByUsername(username);
+    @GetMapping("/find")
+    public ResponseEntity<GetUserResponseDto> getUserByUsername(@RequestBody FindUserRequestDto dto) {
+        Optional<GetUserResponseDto> user = userService.getUserByUsername(dto);
         if (user.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -46,8 +49,8 @@ public class UserController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<GetUserResponse>> getAllUsers() {
-        Optional<List<GetUserResponse>> users = userService.getAllUsers();
+    public ResponseEntity<List<GetUserResponseDto>> getAllUsers() {
+        Optional<List<GetUserResponseDto>> users = userService.getAllUsers();
         if (users.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -55,17 +58,17 @@ public class UserController {
     }
 
     @PutMapping
-    public ResponseEntity<GetUserResponse> updateUser(@RequestBody User user) {
-        Optional<GetUserResponse> userResponse = userService.updateUser(user);
+    public ResponseEntity<GetUserResponseDto> updateUser(@RequestBody UpdateUserRequestDto dto) {
+        Optional<GetUserResponseDto> userResponse = userService.updateUser(dto);
         if (userResponse.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         return new ResponseEntity<>(userResponse.get(), HttpStatus.OK);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<HttpStatus> deleteUser(@PathVariable Long id) {
-        Boolean result = userService.deleteUser(id);
+    @DeleteMapping
+    public ResponseEntity<HttpStatus> deleteUser(@RequestBody DeleteUserRequestDto dto) {
+        Boolean result = userService.deleteUser(dto);
         if (!result) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }

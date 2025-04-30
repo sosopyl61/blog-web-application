@@ -1,11 +1,12 @@
-package com.rymtsou.model.response;
+package com.rymtsou.model.request;
 
-import lombok.Builder;
 import lombok.Data;
 
 @Data
-@Builder
-public class RegistrationResponse {
+public class RegistrationRequestDto {
+    private String login;
+    private String password;
+
     private String username;
     private String firstname;
     private String secondName;
