@@ -1,18 +1,23 @@
 package com.rymtsou.service.impl;
 
 import com.rymtsou.exception.ExistingUserException;
+import com.rymtsou.exception.LoginUsedException;
+import com.rymtsou.exception.SecurityNotFoundException;
 import com.rymtsou.model.domain.Role;
 import com.rymtsou.model.domain.Security;
 import com.rymtsou.model.domain.User;
-import com.rymtsou.model.request.AuthRequestDto;
+import com.rymtsou.model.request.LoginRequestDto;
 import com.rymtsou.model.request.RegistrationRequestDto;
+import com.rymtsou.model.request.UpdateSecurityRequestDto;
 import com.rymtsou.model.response.RegistrationResponseDto;
+import com.rymtsou.model.response.UpdateSecurityResponseDto;
 import com.rymtsou.repository.SecurityRepository;
 import com.rymtsou.repository.UserRepository;
 import com.rymtsou.security.JwtUtil;
 import com.rymtsou.service.SecurityService;
+import com.rymtsou.util.AuthUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,20 +31,22 @@ public class SecurityServiceImpl implements SecurityService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
+    private final AuthUtil authUtil;
 
     @Autowired
-    public SecurityServiceImpl(SecurityRepository securityRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
+    public SecurityServiceImpl(SecurityRepository securityRepository, UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil, AuthUtil authUtil) {
         this.securityRepository = securityRepository;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.authUtil = authUtil;
     }
 
     @Override
-    public Optional<String> generateToken(AuthRequestDto authRequestDto) {
-        Optional<Security> securityOptional = securityRepository.findByLogin(authRequestDto.getLogin());
-        if (securityOptional.isPresent() && passwordEncoder.matches(authRequestDto.getPassword(), securityOptional.get().getPassword())) {
-            return jwtUtil.generateJwtToken(authRequestDto.getLogin());
+    public Optional<String> generateToken(LoginRequestDto loginRequestDto) {
+        Optional<Security> securityOptional = securityRepository.findByLogin(loginRequestDto.getLogin());
+        if (securityOptional.isPresent() && passwordEncoder.matches(loginRequestDto.getPassword(), securityOptional.get().getPassword())) {
+            return jwtUtil.generateJwtToken(loginRequestDto.getLogin());
         }
         return Optional.empty();
     }
@@ -48,24 +55,6 @@ public class SecurityServiceImpl implements SecurityService {
     public Optional<Security> getSecurityById(Long id) {
         return securityRepository.findById(id);
     }
-
-    @Override
-    public Boolean canAccessUser(String username) {
-        String login = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        Optional<Security> optionalSecurity = securityRepository.findByLogin(login);
-        if (optionalSecurity.isEmpty()) {
-            return false;
-        }
-        Security security = optionalSecurity.get();
-        if (security.getRole().equals(Role.ADMIN)) {
-            return true;
-        }
-
-        Optional<User> requestedUser = userRepository.findByUsername(username);
-        return requestedUser.isPresent() && security.getUserId().equals(requestedUser.get().getId());
-    }
-
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -102,5 +91,32 @@ public class SecurityServiceImpl implements SecurityService {
                 .build();
 
         return Optional.of(responseDto);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Optional<UpdateSecurityResponseDto> updateSecurity(UpdateSecurityRequestDto requestDto) {
+        if (!authUtil.canAccessSecurityByLogin(requestDto.getCurrentLogin())) {
+            throw new AccessDeniedException("Access denied, username: " + requestDto.getCurrentLogin());
+        }
+
+        Optional<Security> securityOptional = securityRepository.findByLogin(requestDto.getCurrentLogin());
+        if (securityOptional.isEmpty()) {
+            throw new SecurityNotFoundException("Security not found with login: " + requestDto.getCurrentLogin());
+        }
+
+        if (requestDto.getNewLogin() != null && !requestDto.getNewLogin().equals(securityOptional.get().getLogin())) {
+            if (securityRepository.existsByLogin(requestDto.getNewLogin())) {
+                throw new LoginUsedException(requestDto.getNewLogin());
+            }
+            securityOptional.get().setLogin(requestDto.getNewLogin());
+        }
+
+        if (requestDto.getNewPassword() != null) {
+            securityOptional.get().setPassword(passwordEncoder.encode(requestDto.getNewPassword()));
+        }
+
+        Security updatedSecurity = securityRepository.save(securityOptional.get());
+        return Optional.of(new UpdateSecurityResponseDto(updatedSecurity.getLogin()));
     }
 }

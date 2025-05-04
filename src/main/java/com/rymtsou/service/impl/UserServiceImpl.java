@@ -1,13 +1,14 @@
 package com.rymtsou.service.impl;
 
+import com.rymtsou.exception.UserNotFoundException;
 import com.rymtsou.model.domain.User;
-import com.rymtsou.model.request.DeleteUserRequestDto;
+import com.rymtsou.model.request.DeleteByIdRequestDto;
 import com.rymtsou.model.request.FindUserRequestDto;
 import com.rymtsou.model.request.UpdateUserRequestDto;
 import com.rymtsou.model.response.GetUserResponseDto;
 import com.rymtsou.repository.UserRepository;
-import com.rymtsou.service.SecurityService;
 import com.rymtsou.service.UserService;
+import com.rymtsou.util.AuthUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -20,13 +21,13 @@ import java.util.Optional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final SecurityService securityService;
+    private final AuthUtil authUtil;
 
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, SecurityService securityService) {
+    public UserServiceImpl(UserRepository userRepository, AuthUtil authUtil) {
         this.userRepository = userRepository;
-        this.securityService = securityService;
+        this.authUtil = authUtil;
     }
 
     @Override
@@ -65,23 +66,22 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Optional<GetUserResponseDto> updateUser(UpdateUserRequestDto dto) {
-        if (!securityService.canAccessUser(dto.getUsername())) {
-            throw new AccessDeniedException("Access denied, username: " + dto.getUsername());
+        if (!authUtil.canAccessUser(dto.getId())) {
+            throw new AccessDeniedException("You do not have permission to update this user.");
         }
 
-        Optional<User> optionalUser = userRepository.findByUsername(dto.getUsername());
-        if (optionalUser.isEmpty()) {
-            return Optional.empty();
+        Optional<User> user = userRepository.findById(dto.getId());
+        if (user.isEmpty()) {
+            throw new UserNotFoundException("User not found with id: " + dto.getId());
         }
 
-        User user = optionalUser.get();
-        if (dto.getFirstname() != null) user.setFirstname(dto.getFirstname());
-        if (dto.getSecondName() != null) user.setSecondName(dto.getSecondName());
-        if (dto.getEmail() != null) user.setEmail(dto.getEmail());
-        if (dto.getAge() != null) user.setAge(dto.getAge());
-        if (dto.getSex() != null) user.setSex(dto.getSex());
+        if (dto.getFirstname() != null) user.get().setFirstname(dto.getFirstname());
+        if (dto.getSecondName() != null) user.get().setSecondName(dto.getSecondName());
+        if (dto.getEmail() != null) user.get().setEmail(dto.getEmail());
+        if (dto.getAge() != null) user.get().setAge(dto.getAge());
+        if (dto.getSex() != null) user.get().setSex(dto.getSex());
 
-        User updatedUser = userRepository.save(user);
+        User updatedUser = userRepository.save(user.get());
 
         return Optional.of(GetUserResponseDto.builder()
                 .username(updatedUser.getUsername())
@@ -95,11 +95,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean deleteUser(DeleteUserRequestDto dto) {
-        if (securityService.canAccessUser(dto.getUsername())) {
-            userRepository.deleteByUsername(dto.getUsername());
-            return !userRepository.existsByUsername(dto.getUsername());
+    public Boolean deleteUser(DeleteByIdRequestDto dto) {
+        if (authUtil.canAccessUser(dto.getId())) {
+            userRepository.deleteById(dto.getId());
+            return !userRepository.existsById(dto.getId());
         }
-        throw new AccessDeniedException("Access denied, username: " + dto.getUsername());
+        throw new AccessDeniedException("Access denied, id: " + dto.getId());
     }
 }

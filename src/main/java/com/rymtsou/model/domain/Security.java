@@ -1,5 +1,6 @@
 package com.rymtsou.model.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -30,6 +31,8 @@ public class Security {
     @GeneratedValue(generator = "sec_seq_gen")
     private Long id;
     private String login;
+
+    @JsonIgnore
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;

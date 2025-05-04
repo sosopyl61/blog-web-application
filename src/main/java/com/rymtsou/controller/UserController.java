@@ -1,10 +1,11 @@
 package com.rymtsou.controller;
 
 import com.rymtsou.model.domain.User;
-import com.rymtsou.model.request.DeleteUserRequestDto;
+import com.rymtsou.model.request.DeleteByIdRequestDto;
 import com.rymtsou.model.request.FindUserRequestDto;
 import com.rymtsou.model.request.UpdateUserRequestDto;
 import com.rymtsou.model.response.GetUserResponseDto;
+import com.rymtsou.service.UserService;
 import com.rymtsou.service.impl.UserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,7 +24,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final UserServiceImpl userService;
+    private final UserService userService;
 
     @Autowired
     public UserController(UserServiceImpl userService) {
@@ -48,7 +49,7 @@ public class UserController {
         return new ResponseEntity<>(user.get(), HttpStatus.OK);
     }
 
-    @GetMapping("/all")
+    @GetMapping("/find/all")
     public ResponseEntity<List<GetUserResponseDto>> getAllUsers() {
         Optional<List<GetUserResponseDto>> users = userService.getAllUsers();
         if (users.isEmpty()) {
@@ -67,7 +68,7 @@ public class UserController {
     }
 
     @DeleteMapping
-    public ResponseEntity<HttpStatus> deleteUser(@RequestBody DeleteUserRequestDto dto) {
+    public ResponseEntity<HttpStatus> deleteUser(@RequestBody DeleteByIdRequestDto dto) {
         Boolean result = userService.deleteUser(dto);
         if (!result) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
