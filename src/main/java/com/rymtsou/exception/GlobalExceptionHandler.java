@@ -52,20 +52,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(value = UserNotFoundException.class)
-    public ResponseEntity<String> userNotFoundExceptionHandler(UserNotFoundException exception) {
-        log.error(exception.getMessage());
-        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(value = SecurityNotFoundException.class)
-    public ResponseEntity<String> securityNotFoundExceptionHandler(SecurityNotFoundException exception) {
-        log.error(exception.getMessage());
-        return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(value = PostNotFoundException.class)
-    public ResponseEntity<String> postNotFoundExceptionHandler(PostNotFoundException exception) {
+    @ExceptionHandler(value = EntityNotFoundException.class)
+    public ResponseEntity<String> entityNotFoundExceptionHandler(EntityNotFoundException exception) {
         log.error(exception.getMessage());
         return new ResponseEntity<>(exception.getMessage(), HttpStatus.NOT_FOUND);
     }

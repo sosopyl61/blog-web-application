@@ -1,5 +1,6 @@
 package com.rymtsou.model.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -9,20 +10,18 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.context.annotation.Scope;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 
-@Scope("prototype")
 @Entity(name = "comments")
-@Component
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
@@ -42,10 +41,12 @@ public class Comment {
     private Timestamp updated;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "comment_author_id", nullable = false)
     private User comm_author;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
 }

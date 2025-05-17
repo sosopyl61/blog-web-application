@@ -1,6 +1,6 @@
 package com.rymtsou.service.impl;
 
-import com.rymtsou.exception.PostNotFoundException;
+import com.rymtsou.exception.EntityNotFoundException;
 import com.rymtsou.model.domain.Post;
 import com.rymtsou.model.domain.Role;
 import com.rymtsou.model.domain.Security;
@@ -41,34 +41,29 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Optional<CreatePostResponseDto> createPost(CreatePostRequestDto requestDto) {
-        Optional<Security> optionalSecurity = authUtil.getCurrentSecurity();
+        Security security = authUtil.getCurrentSecurity()
+                .orElseThrow(() -> new EntityNotFoundException("Security not found."));
 
-        if (optionalSecurity.isEmpty()) {
-            throw new UsernameNotFoundException("Security not found.");
-        }
+        User user;
 
-        Optional<User> user;
-
-        if (optionalSecurity.get().getRole().equals(Role.ADMIN)) {
+        if (security.getRole().equals(Role.ADMIN)) {
             if (requestDto.getUsername() == null) {
                 throw new IllegalArgumentException("Admin must provide a username to create post!");
             }
-            user = userRepository.findByUsername(requestDto.getUsername());
+            user = userRepository.findByUsername(requestDto.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + requestDto.getUsername()));
         } else {
             if (requestDto.getUsername() != null) {
                 throw new AccessDeniedException("You cannot specify username.");
             }
-            user = userRepository.findById(optionalSecurity.get().getUserId());
-        }
-
-        if (user.isEmpty()) {
-            throw new UsernameNotFoundException("User not found.");
+            user = userRepository.findById(security.getUserId())
+                    .orElseThrow(() -> new EntityNotFoundException("User not found with id: " + security.getUserId()));
         }
 
         Post post = Post.builder()
                 .title(requestDto.getTitle())
                 .content(requestDto.getContent())
-                .author(user.get())
+                .author(user)
                 .build();
 
         Post createdPost = postRepository.save(post);
@@ -94,18 +89,19 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public List<GetPostResponseDto> getPostsByUsername(FindPostRequestDto dto) {
-        Optional<User> optionalUser = userRepository.findByUsername(dto.getUsername());
-        if (optionalUser.isEmpty()) {
-            throw new UsernameNotFoundException("User not found for username: " + dto.getUsername());
-        }
+        User user = userRepository.findByUsername(dto.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + dto.getUsername()));
 
-        return optionalUser.get().getPosts().stream().map(post -> GetPostResponseDto.builder()
-                .title(post.getTitle())
-                .content(post.getContent())
-                .author(post.getAuthor().getUsername())
-                .created(post.getCreated().toLocalDateTime())
-                .updated(post.getUpdated().toLocalDateTime())
-                .build()).toList();
+        return user.getPosts()
+                .stream()
+                .map(post -> GetPostResponseDto.builder()
+                        .title(post.getTitle())
+                        .content(post.getContent())
+                        .author(post.getAuthor().getUsername())
+                        .created(post.getCreated().toLocalDateTime())
+                        .updated(post.getUpdated().toLocalDateTime())
+                        .build())
+                .toList();
     }
 
     @Override
@@ -127,22 +123,24 @@ public class PostServiceImpl implements PostService {
             throw new AccessDeniedException("You do not have permission to update this post.");
         }
 
-        Optional<Post> post = postRepository.findById(requestDto.getId());
-        if (post.isEmpty()) {
-            throw new PostNotFoundException("Post not found for id: " + requestDto.getId());
-        }
+        Post post = postRepository.findById(requestDto.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Post not found with id: " + requestDto.getId()));
 
-        if (requestDto.getTitle() != null) post.get().setTitle(requestDto.getTitle());
-        if (requestDto.getContent() != null) post.get().setContent(requestDto.getContent());
+        if (requestDto.getTitle() != null && !requestDto.getTitle().equals(post.getTitle()))
+            post.setTitle(requestDto.getTitle());
+        if (requestDto.getContent() != null && requestDto.getContent().equals(post.getContent()))
+            post.setContent(requestDto.getContent());
 
-        postRepository.save(post.get());
+        Post updatedPost = postRepository.save(post);
+        postRepository.flush();
+
         return Optional.of(GetPostResponseDto.builder()
-                        .title(post.get().getTitle())
-                        .content(post.get().getContent())
-                        .author(post.get().getAuthor().getUsername())
-                        .created(post.get().getCreated().toLocalDateTime())
-                        .updated(post.get().getUpdated().toLocalDateTime())
-                        .build());
+                .title(updatedPost.getTitle())
+                .content(updatedPost.getContent())
+                .author(updatedPost.getAuthor().getUsername())
+                .created(updatedPost.getCreated().toLocalDateTime())
+                .updated(updatedPost.getUpdated().toLocalDateTime())
+                .build());
     }
 
     @Override

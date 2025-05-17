@@ -1,15 +1,15 @@
 package com.rymtsou.util;
 
-import com.rymtsou.exception.PostNotFoundException;
+import com.rymtsou.exception.EntityNotFoundException;
+import com.rymtsou.model.domain.Comment;
 import com.rymtsou.model.domain.Post;
 import com.rymtsou.model.domain.Role;
 import com.rymtsou.model.domain.Security;
+import com.rymtsou.repository.CommentRepository;
 import com.rymtsou.repository.PostRepository;
 import com.rymtsou.repository.SecurityRepository;
-import com.rymtsou.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -18,11 +18,13 @@ import java.util.Optional;
 public class AuthUtil {
     private final SecurityRepository securityRepository;
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
 
     @Autowired
-    public AuthUtil(SecurityRepository securityRepository, PostRepository postRepository) {
+    public AuthUtil(SecurityRepository securityRepository, PostRepository postRepository, CommentRepository commentRepository) {
         this.securityRepository = securityRepository;
         this.postRepository = postRepository;
+        this.commentRepository = commentRepository;
     }
 
     public Optional<Security> getCurrentSecurity() {
@@ -31,34 +33,40 @@ public class AuthUtil {
     }
 
     public Boolean canAccessUser(Long id) {
-        Optional<Security> currentSecurity = getCurrentSecurity();
-        if (currentSecurity.isEmpty()) {
-            throw new UsernameNotFoundException("User not found.");
-        }
-        return currentSecurity.get().getRole().equals(Role.ADMIN) ||
-                currentSecurity.get().getUserId().equals(id);
+        Security currentSecurity = getCurrentSecurity()
+                .orElseThrow(() -> new EntityNotFoundException("Security not found."));
+
+        return currentSecurity.getRole().equals(Role.ADMIN) ||
+                currentSecurity.getUserId().equals(id);
     }
 
     public Boolean canAccessSecurityByLogin(String currentLogin) {
-        Optional<Security> currentSecurity = getCurrentSecurity();
-        if (currentSecurity.isEmpty()) {
-            throw new UsernameNotFoundException("User not found.");
-        }
-        return currentSecurity.get().getRole().equals(Role.ADMIN) ||
-                currentSecurity.get().getLogin().equals(currentLogin);
+        Security currentSecurity = getCurrentSecurity()
+                .orElseThrow(() -> new EntityNotFoundException("Security not found."));
+
+        return currentSecurity.getRole().equals(Role.ADMIN) ||
+                currentSecurity.getLogin().equals(currentLogin);
     }
 
     public Boolean canAccessPost(Long id) {
-        Optional<Security> currentSecurity = getCurrentSecurity();
-        if (currentSecurity.isEmpty()) {
-            throw new UsernameNotFoundException("User not found.");
-        }
+        Security currentSecurity = getCurrentSecurity()
+                .orElseThrow(() -> new EntityNotFoundException("Security not found."));
 
-        Optional<Post> post = postRepository.findById(id);
-        if (post.isEmpty()) {
-            throw new PostNotFoundException("Post not found with id: " + id);
-        }
-        return currentSecurity.get().getRole().equals(Role.ADMIN) ||
-                currentSecurity.get().getUserId().equals(post.get().getAuthor().getId());
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Post not found with id: " + id));
+
+        return currentSecurity.getRole().equals(Role.ADMIN) ||
+                currentSecurity.getUserId().equals(post.getAuthor().getId());
+    }
+
+    public Boolean canAccessComment(Long id) {
+        Security currentSecurity = getCurrentSecurity()
+                .orElseThrow(() -> new EntityNotFoundException("Security not found."));
+
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Comment not found with id: " + id));
+
+        return currentSecurity.getRole().equals(Role.ADMIN) ||
+                currentSecurity.getUserId().equals(comment.getComm_author().getId());
     }
 }

@@ -1,8 +1,8 @@
 package com.rymtsou.service.impl;
 
+import com.rymtsou.exception.EntityNotFoundException;
 import com.rymtsou.exception.ExistingUserException;
 import com.rymtsou.exception.LoginUsedException;
-import com.rymtsou.exception.SecurityNotFoundException;
 import com.rymtsou.model.domain.Role;
 import com.rymtsou.model.domain.Security;
 import com.rymtsou.model.domain.User;
@@ -102,7 +102,7 @@ public class SecurityServiceImpl implements SecurityService {
 
         Optional<Security> securityOptional = securityRepository.findByLogin(requestDto.getCurrentLogin());
         if (securityOptional.isEmpty()) {
-            throw new SecurityNotFoundException("Security not found with login: " + requestDto.getCurrentLogin());
+            throw new EntityNotFoundException("Security not found with login: " + requestDto.getCurrentLogin());
         }
 
         if (requestDto.getNewLogin() != null && !requestDto.getNewLogin().equals(securityOptional.get().getLogin())) {

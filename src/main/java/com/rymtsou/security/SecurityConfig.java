@@ -3,6 +3,7 @@ package com.rymtsou.security;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -27,19 +28,23 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         requests -> requests
-                                .requestMatchers("/security", "PUT").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/posts", "DELETE").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/registration", "POST").permitAll()
-                                .requestMatchers("/login", "POST").permitAll()
-                                .requestMatchers("/users/find/all", "GET").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/users/find", "GET").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/users/{id}", "GET").hasRole("ADMIN")
-                                .requestMatchers("/users", "PUT").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/users", "DELETE").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/security/**", "GET").hasAnyRole("ADMIN")
-                                .requestMatchers("/posts", "POST").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/posts/**", "GET").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers("/posts", "PUT").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/comments").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/registration").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/posts").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/comments").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/users/{id}").hasRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/users/find").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/users/find/all").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/security/**").hasAnyRole("ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/posts/**").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.GET, "/comments/**").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/users").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/security").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/posts").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.PUT, "/comments").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/users").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/posts").hasAnyRole("USER", "ADMIN")
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

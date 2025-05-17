@@ -1,6 +1,6 @@
 package com.rymtsou.service.impl;
 
-import com.rymtsou.exception.UserNotFoundException;
+import com.rymtsou.exception.EntityNotFoundException;
 import com.rymtsou.model.domain.User;
 import com.rymtsou.model.request.DeleteByIdRequestDto;
 import com.rymtsou.model.request.FindUserRequestDto;
@@ -72,7 +72,7 @@ public class UserServiceImpl implements UserService {
 
         Optional<User> user = userRepository.findById(dto.getId());
         if (user.isEmpty()) {
-            throw new UserNotFoundException("User not found with id: " + dto.getId());
+            throw new EntityNotFoundException("User not found with id: " + dto.getId());
         }
 
         if (dto.getFirstname() != null) user.get().setFirstname(dto.getFirstname());
