@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import java.util.Optional;
-
 @Component
 public class AuthUtil {
     private final SecurityRepository securityRepository;
@@ -27,31 +25,26 @@ public class AuthUtil {
         this.commentRepository = commentRepository;
     }
 
-    public Optional<Security> getCurrentSecurity() {
+    public Security getCurrentSecurity() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-        return securityRepository.findByLogin(login);
+        return securityRepository.findByLogin(login)
+                .orElseThrow(() -> new EntityNotFoundException("Security not found with username: " + login));
     }
 
     public Boolean canAccessUser(Long id) {
-        Security currentSecurity = getCurrentSecurity()
-                .orElseThrow(() -> new EntityNotFoundException("Security not found."));
-
+        Security currentSecurity = getCurrentSecurity();
         return currentSecurity.getRole().equals(Role.ADMIN) ||
                 currentSecurity.getUserId().equals(id);
     }
 
     public Boolean canAccessSecurityByLogin(String currentLogin) {
-        Security currentSecurity = getCurrentSecurity()
-                .orElseThrow(() -> new EntityNotFoundException("Security not found."));
-
+        Security currentSecurity = getCurrentSecurity();
         return currentSecurity.getRole().equals(Role.ADMIN) ||
                 currentSecurity.getLogin().equals(currentLogin);
     }
 
     public Boolean canAccessPost(Long id) {
-        Security currentSecurity = getCurrentSecurity()
-                .orElseThrow(() -> new EntityNotFoundException("Security not found."));
-
+        Security currentSecurity = getCurrentSecurity();
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Post not found with id: " + id));
 
@@ -60,9 +53,7 @@ public class AuthUtil {
     }
 
     public Boolean canAccessComment(Long id) {
-        Security currentSecurity = getCurrentSecurity()
-                .orElseThrow(() -> new EntityNotFoundException("Security not found."));
-
+        Security currentSecurity = getCurrentSecurity();
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Comment not found with id: " + id));
 

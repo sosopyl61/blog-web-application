@@ -2,7 +2,7 @@ package com.rymtsou.service;
 
 import com.rymtsou.model.request.CreatePostRequestDto;
 import com.rymtsou.model.request.DeleteByIdRequestDto;
-import com.rymtsou.model.request.FindPostRequestDto;
+import com.rymtsou.model.request.FindPostsRequestDto;
 import com.rymtsou.model.request.UpdatePostRequestDto;
 import com.rymtsou.model.response.CreatePostResponseDto;
 import com.rymtsou.model.response.GetPostResponseDto;
@@ -13,8 +13,9 @@ import java.util.Optional;
 public interface PostService {
     Optional<CreatePostResponseDto> createPost(CreatePostRequestDto requestDto);
     Optional<GetPostResponseDto> getPostById(Long id);
-    List<GetPostResponseDto> getPostsByUsername(FindPostRequestDto requestDto);
+    List<GetPostResponseDto> getPostsByUsername(FindPostsRequestDto requestDto);
     List<GetPostResponseDto> getAllPosts();
     Optional<GetPostResponseDto> updatePost(UpdatePostRequestDto requestDto);
     Boolean deletePost(DeleteByIdRequestDto requestDto);
+    Long getLikesCountById(Long id);
 }

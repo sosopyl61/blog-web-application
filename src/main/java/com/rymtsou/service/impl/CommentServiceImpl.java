@@ -12,6 +12,7 @@ import com.rymtsou.model.request.UpdateCommentRequestDto;
 import com.rymtsou.model.response.CreateCommentResponseDto;
 import com.rymtsou.model.response.GetCommentResponseDto;
 import com.rymtsou.repository.CommentRepository;
+import com.rymtsou.repository.LikeRepository;
 import com.rymtsou.repository.PostRepository;
 import com.rymtsou.repository.UserRepository;
 import com.rymtsou.service.CommentService;
@@ -32,20 +33,21 @@ public class CommentServiceImpl implements CommentService {
     private final UserRepository userRepository;
     private final AuthUtil authUtil;
     private final PostRepository postRepository;
+    private final LikeRepository likeRepository;
 
     @Autowired
-    public CommentServiceImpl(CommentRepository commentRepository, UserRepository userRepository, AuthUtil authUtil, PostRepository postRepository) {
+    public CommentServiceImpl(CommentRepository commentRepository, UserRepository userRepository, AuthUtil authUtil, PostRepository postRepository, LikeRepository likeRepository) {
         this.commentRepository = commentRepository;
         this.userRepository = userRepository;
         this.authUtil = authUtil;
         this.postRepository = postRepository;
+        this.likeRepository = likeRepository;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Optional<CreateCommentResponseDto> createComment(CreateCommentRequestDto requestDto) {
-        Security optionalSecurity = authUtil.getCurrentSecurity()
-                .orElseThrow(() -> new EntityNotFoundException("Security not found."));
+        Security optionalSecurity = authUtil.getCurrentSecurity();
 
         Post post = postRepository.findById(requestDto.getPostId())
                 .orElseThrow(() -> new EntityNotFoundException("Post not found with id: " + requestDto.getPostId()));
@@ -139,5 +141,12 @@ public class CommentServiceImpl implements CommentService {
             return !commentRepository.existsById(dto.getId());
         }
         throw new AccessDeniedException("Access denied, id: " + dto.getId());
+    }
+
+    @Override
+    public Long getLikesCountById(Long id) {
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Comment not found with id: " + id));
+        return likeRepository.countLikesByComment(comment);
     }
 }

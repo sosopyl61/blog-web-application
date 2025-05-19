@@ -2,7 +2,7 @@ package com.rymtsou.controller;
 
 import com.rymtsou.model.request.CreatePostRequestDto;
 import com.rymtsou.model.request.DeleteByIdRequestDto;
-import com.rymtsou.model.request.FindPostRequestDto;
+import com.rymtsou.model.request.FindPostsRequestDto;
 import com.rymtsou.model.request.UpdatePostRequestDto;
 import com.rymtsou.model.response.CreatePostResponseDto;
 import com.rymtsou.model.response.GetPostResponseDto;
@@ -51,7 +51,7 @@ public class PostController {
     }
 
     @GetMapping("/find")
-    public ResponseEntity<List<GetPostResponseDto>> getPostsByUsername(@RequestBody FindPostRequestDto dto) {
+    public ResponseEntity<List<GetPostResponseDto>> getPostsByUsername(@RequestBody FindPostsRequestDto dto) {
         List<GetPostResponseDto> posts = postService.getPostsByUsername(dto);
         return new ResponseEntity<>(posts, HttpStatus.OK);
     }
@@ -78,5 +78,11 @@ public class PostController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/countLikes/{id}")
+    public ResponseEntity<String> countLikes(@PathVariable Long id) {
+        Long likes = postService.getLikesCountById(id);
+        return new ResponseEntity<>("Likes: " + likes, HttpStatus.OK);
     }
 }

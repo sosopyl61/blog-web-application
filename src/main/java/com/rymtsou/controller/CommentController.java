@@ -72,4 +72,10 @@ public class CommentController {
         }
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @GetMapping("/countLikes/{id}")
+    public ResponseEntity<String> countLikes(@PathVariable Long id) {
+        Long likes = commentService.getLikesCountById(id);
+        return new ResponseEntity<>("Likes: " + likes, HttpStatus.OK);
+    }
 }

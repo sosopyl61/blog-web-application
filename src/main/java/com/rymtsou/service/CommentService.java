@@ -15,4 +15,5 @@ public interface CommentService {
     List<GetCommentResponseDto> getAllCommentsByPostId(Long postId);
     Optional<GetCommentResponseDto> updateComment(UpdateCommentRequestDto requestDto);
     Boolean deleteComment(DeleteByIdRequestDto requestDto);
+    Long getLikesCountById(Long id);
 }
