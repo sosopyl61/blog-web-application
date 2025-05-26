@@ -94,3 +94,26 @@ create table if not exists public.comments
 
 alter table public.comments
     owner to user32;
+
+create table if not exists public.likes
+(
+    id         bigserial
+        constraint likes_pk
+            primary key,
+    user_id    bigint    not null
+        constraint likes_users_id_fk
+            references public.users
+            on update cascade on delete cascade,
+    post_id    bigint
+        constraint likes_posts_id_fk
+            references public.posts
+            on update cascade on delete cascade,
+    comment_id bigint
+        constraint likes_comments_id_fk
+            references public.comments
+            on update cascade on delete cascade,
+    created    timestamp not null
+);
+
+alter table public.likes
+    owner to user32;

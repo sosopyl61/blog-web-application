@@ -28,6 +28,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         requests -> requests
+                                .requestMatchers(HttpMethod.GET, "/actuator/**").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/posts/**").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.POST, "/likes/**").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/users/find").hasAnyRole("USER", "ADMIN")
