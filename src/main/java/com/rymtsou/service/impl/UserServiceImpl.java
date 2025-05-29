@@ -2,10 +2,9 @@ package com.rymtsou.service.impl;
 
 import com.rymtsou.exception.EntityNotFoundException;
 import com.rymtsou.model.domain.User;
-import com.rymtsou.model.request.DeleteByIdRequestDto;
-import com.rymtsou.model.request.FindUserRequestDto;
 import com.rymtsou.model.request.UpdateUserRequestDto;
 import com.rymtsou.model.response.GetUserResponseDto;
+import com.rymtsou.model.response.GetUsersResponseDto;
 import com.rymtsou.repository.UserRepository;
 import com.rymtsou.service.UserService;
 import com.rymtsou.util.AuthUtil;
@@ -36,8 +35,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<GetUserResponseDto> getUserByUsername(FindUserRequestDto dto) {
-        return userRepository.findByUsername(dto.getUsername())
+    public Optional<GetUserResponseDto> getUserByUsername(String username) {
+        return userRepository.findByUsername(username)
                 .map(user -> GetUserResponseDto.builder()
                         .username(user.getUsername())
                         .firstname(user.getFirstname())
@@ -45,14 +44,15 @@ public class UserServiceImpl implements UserService {
                         .email(user.getEmail())
                         .age(user.getAge())
                         .sex(user.getSex())
+                        .posts(user.getPosts())
                         .build()
                 );
     }
 
     @Override
-    public Optional<List<GetUserResponseDto>> getAllUsers() {
+    public Optional<List<GetUsersResponseDto>> getAllUsers() {
         return Optional.of(userRepository.findAll().stream()
-                .map(user -> GetUserResponseDto.builder()
+                .map(user -> GetUsersResponseDto.builder()
                         .username(user.getUsername())
                         .firstname(user.getFirstname())
                         .secondName(user.getSecondName())
@@ -65,7 +65,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Optional<GetUserResponseDto> updateUser(UpdateUserRequestDto dto) {
+    public Optional<GetUsersResponseDto> updateUser(UpdateUserRequestDto dto) {
         if (!authUtil.canAccessUser(dto.getId())) {
             throw new AccessDeniedException("You do not have permission to update this user.");
         }
@@ -83,7 +83,7 @@ public class UserServiceImpl implements UserService {
 
         User updatedUser = userRepository.save(user.get());
 
-        return Optional.of(GetUserResponseDto.builder()
+        return Optional.of(GetUsersResponseDto.builder()
                 .username(updatedUser.getUsername())
                 .firstname(updatedUser.getFirstname())
                 .secondName(updatedUser.getSecondName())
@@ -95,11 +95,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean deleteUser(DeleteByIdRequestDto dto) {
-        if (authUtil.canAccessUser(dto.getId())) {
-            userRepository.deleteById(dto.getId());
-            return !userRepository.existsById(dto.getId());
+    public Boolean deleteUser(Long id) {
+        if (authUtil.canAccessUser(id)) {
+            userRepository.deleteById(id);
+            return !userRepository.existsById(id);
         }
-        throw new AccessDeniedException("Access denied, id: " + dto.getId());
+        throw new AccessDeniedException("Access denied, id: " + id);
     }
 }

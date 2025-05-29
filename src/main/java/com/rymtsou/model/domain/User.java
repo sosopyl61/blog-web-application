@@ -1,5 +1,7 @@
 package com.rymtsou.model.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -31,6 +33,7 @@ public class User {
     @Id
     @SequenceGenerator(name = "user_seq_gen", sequenceName = "users_id_seq", allocationSize = 1)
     @GeneratedValue(generator = "user_seq_gen")
+    @JsonIgnore
     private Long id;
     @Column(unique = true)
     private String username;
@@ -43,10 +46,12 @@ public class User {
 
     @CreatedDate
     @Column(name = "created", updatable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy HH:mm")
     private Timestamp created;
 
     @LastModifiedDate
     @Column(name = "updated")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy HH:mm")
     private Timestamp updated;
 
     @JsonManagedReference

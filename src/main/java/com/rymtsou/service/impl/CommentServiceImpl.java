@@ -7,7 +7,6 @@ import com.rymtsou.model.domain.Role;
 import com.rymtsou.model.domain.Security;
 import com.rymtsou.model.domain.User;
 import com.rymtsou.model.request.CreateCommentRequestDto;
-import com.rymtsou.model.request.DeleteByIdRequestDto;
 import com.rymtsou.model.request.UpdateCommentRequestDto;
 import com.rymtsou.model.response.CreateCommentResponseDto;
 import com.rymtsou.model.response.GetCommentResponseDto;
@@ -135,12 +134,12 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean deleteComment(DeleteByIdRequestDto dto) {
-        if (authUtil.canAccessComment(dto.getId())) {
-            commentRepository.deleteById(dto.getId());
-            return !commentRepository.existsById(dto.getId());
+    public Boolean deleteComment(Long id) {
+        if (authUtil.canAccessComment(id)) {
+            commentRepository.deleteById(id);
+            return !commentRepository.existsById(id);
         }
-        throw new AccessDeniedException("Access denied, id: " + dto.getId());
+        throw new AccessDeniedException("Access denied, id: " + id);
     }
 
     @Override

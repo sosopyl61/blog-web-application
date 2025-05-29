@@ -28,25 +28,32 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         requests -> requests
+                                .requestMatchers(
+                                        "/swagger-ui.html",
+                                        "/swagger-ui/**",
+                                        "/v3/api-docs",
+                                        "/v3/api-docs/**",
+                                        "/swagger-resources/**",
+                                        "/webjars/**"
+                                )/*.hasRole("ADMIN")*/.permitAll()
+                                .requestMatchers(HttpMethod.DELETE, "/users/**").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/registration").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/actuator/**").hasRole("ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/posts/**").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.POST, "/likes/**").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/users/find").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers(HttpMethod.DELETE, "/comments").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/registration").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/users/find/**").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/comments/**").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.POST, "/login").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/posts").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.POST, "/comments").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/users/{id}").hasRole("ADMIN")
-                                .requestMatchers(HttpMethod.GET, "/users/find/all").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/security/**").hasAnyRole("ADMIN")
                                 .requestMatchers(HttpMethod.GET, "/comments/**").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/users").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/security").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/posts").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.PUT, "/comments").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers(HttpMethod.DELETE, "/users").hasAnyRole("USER", "ADMIN")
-                                .requestMatchers(HttpMethod.DELETE, "/posts").hasAnyRole("USER", "ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/posts/**").hasAnyRole("USER", "ADMIN")
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

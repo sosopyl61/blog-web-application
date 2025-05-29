@@ -1,6 +1,8 @@
 package com.rymtsou.model.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,6 +36,7 @@ public class Post {
     @Id
     @SequenceGenerator(name = "post_seq_gen", sequenceName = "posts_id_seq", allocationSize = 1)
     @GeneratedValue(generator = "post_seq_gen")
+    @JsonIgnore
     private Long id;
 
     @Column(nullable = false)
@@ -42,9 +45,11 @@ public class Post {
 
     @CreatedDate
     @Column(updatable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy HH:mm")
     private Timestamp created;
 
     @LastModifiedDate
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy HH:mm")
     private Timestamp updated;
 
     @ManyToOne

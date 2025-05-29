@@ -6,11 +6,10 @@ import com.rymtsou.model.domain.Role;
 import com.rymtsou.model.domain.Security;
 import com.rymtsou.model.domain.User;
 import com.rymtsou.model.request.CreatePostRequestDto;
-import com.rymtsou.model.request.DeleteByIdRequestDto;
-import com.rymtsou.model.request.FindPostsRequestDto;
 import com.rymtsou.model.request.UpdatePostRequestDto;
 import com.rymtsou.model.response.CreatePostResponseDto;
 import com.rymtsou.model.response.GetPostResponseDto;
+import com.rymtsou.model.response.GetPostsResponseDto;
 import com.rymtsou.repository.LikeRepository;
 import com.rymtsou.repository.PostRepository;
 import com.rymtsou.repository.UserRepository;
@@ -85,17 +84,18 @@ public class PostServiceImpl implements PostService {
                         .author(post.getAuthor().getUsername())
                         .created(post.getCreated().toLocalDateTime())
                         .updated(post.getUpdated().toLocalDateTime())
+                        .comments(post.getComments())
                         .build());
     }
 
     @Override
-    public List<GetPostResponseDto> getPostsByUsername(FindPostsRequestDto dto) {
-        User user = userRepository.findByUsername(dto.getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + dto.getUsername()));
+    public List<GetPostsResponseDto> getPostsByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
         return user.getPosts()
                 .stream()
-                .map(post -> GetPostResponseDto.builder()
+                .map(post -> GetPostsResponseDto.builder()
                         .title(post.getTitle())
                         .content(post.getContent())
                         .author(post.getAuthor().getUsername())
@@ -106,15 +106,17 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<GetPostResponseDto> getAllPosts() {
-        return postRepository.findAll().stream()
-                .map(post -> GetPostResponseDto.builder()
+    public List<GetPostsResponseDto> getAllPosts() {
+        return postRepository.findAll()
+                .stream()
+                .map(post -> GetPostsResponseDto.builder()
                         .title(post.getTitle())
                         .content(post.getContent())
                         .author(post.getAuthor().getUsername())
                         .created(post.getCreated().toLocalDateTime())
                         .updated(post.getUpdated().toLocalDateTime())
-                        .build()).toList();
+                        .build())
+                .toList();
     }
 
     @Override
@@ -141,17 +143,18 @@ public class PostServiceImpl implements PostService {
                 .author(updatedPost.getAuthor().getUsername())
                 .created(updatedPost.getCreated().toLocalDateTime())
                 .updated(updatedPost.getUpdated().toLocalDateTime())
+                .comments(updatedPost.getComments())
                 .build());
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean deletePost(DeleteByIdRequestDto dto) {
-        if (authUtil.canAccessPost(dto.getId())) {
-            postRepository.deleteById(dto.getId());
-            return !postRepository.existsById(dto.getId());
+    public Boolean deletePost(Long id) {
+        if (authUtil.canAccessPost(id)) {
+            postRepository.deleteById(id);
+            return !postRepository.existsById(id);
         }
-        throw new AccessDeniedException("Access denied, id: " + dto.getId());
+        throw new AccessDeniedException("Access denied, id: " + id);
     }
 
     @Override

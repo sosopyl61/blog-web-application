@@ -1,5 +1,6 @@
 package com.rymtsou.model.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -29,6 +30,7 @@ public class Security {
     @Id
     @SequenceGenerator(name = "sec_seq_gen", sequenceName = "security_id_seq", allocationSize = 1)
     @GeneratedValue(generator = "sec_seq_gen")
+    @JsonIgnore
     private Long id;
     private String login;
 
@@ -39,10 +41,12 @@ public class Security {
 
     @CreatedDate
     @Column(name = "created", updatable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy HH:mm")
     private Timestamp created;
 
     @LastModifiedDate
     @Column(name = "updated")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy HH:mm")
     private Timestamp updated;
 
     @Column(name = "user_id")

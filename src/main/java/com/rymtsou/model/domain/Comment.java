@@ -1,6 +1,8 @@
 package com.rymtsou.model.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -29,15 +31,18 @@ public class Comment {
     @Id
     @SequenceGenerator(name = "comment_seq_gen", sequenceName = "comments_id_seq", allocationSize = 1)
     @GeneratedValue(generator = "comment_seq_gen")
+    @JsonIgnore
     private Long id;
     @Column(name = "comment_text")
     private String commentText;
 
     @CreatedDate
     @Column(updatable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy HH:mm")
     private Timestamp created;
 
     @LastModifiedDate
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd.MM.yyyy HH:mm")
     private Timestamp updated;
 
     @ManyToOne

@@ -1,5 +1,6 @@
 package com.rymtsou.model.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
@@ -24,10 +25,10 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
 public class Like {
-
     @Id
     @SequenceGenerator(name = "like_seq_gen", sequenceName = "likes_id_seq", allocationSize = 1)
     @GeneratedValue(generator = "user_seq_gen")
+    @JsonIgnore
     private Long id;
 
     @ManyToOne

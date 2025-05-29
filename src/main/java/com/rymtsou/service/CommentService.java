@@ -1,7 +1,6 @@
 package com.rymtsou.service;
 
 import com.rymtsou.model.request.CreateCommentRequestDto;
-import com.rymtsou.model.request.DeleteByIdRequestDto;
 import com.rymtsou.model.request.UpdateCommentRequestDto;
 import com.rymtsou.model.response.CreateCommentResponseDto;
 import com.rymtsou.model.response.GetCommentResponseDto;
@@ -14,6 +13,6 @@ public interface CommentService {
     Optional<GetCommentResponseDto> getCommentById(Long id);
     List<GetCommentResponseDto> getAllCommentsByPostId(Long postId);
     Optional<GetCommentResponseDto> updateComment(UpdateCommentRequestDto requestDto);
-    Boolean deleteComment(DeleteByIdRequestDto requestDto);
+    Boolean deleteComment(Long id);
     Long getLikesCountById(Long id);
 }

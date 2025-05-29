@@ -1,8 +1,8 @@
 package com.rymtsou.service.impl;
 
 import com.rymtsou.exception.EntityNotFoundException;
-import com.rymtsou.exception.ExistingUserException;
-import com.rymtsou.exception.LoginUsedException;
+import com.rymtsou.exception.ExistingUserLoginException;
+import com.rymtsou.exception.ExistingUsernameException;
 import com.rymtsou.model.domain.Role;
 import com.rymtsou.model.domain.Security;
 import com.rymtsou.model.domain.User;
@@ -58,9 +58,13 @@ public class SecurityServiceImpl implements SecurityService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Optional<RegistrationResponseDto> registration(RegistrationRequestDto requestDto) throws ExistingUserException {
+    public Optional<RegistrationResponseDto> registration(RegistrationRequestDto requestDto) throws ExistingUserLoginException, ExistingUsernameException {
         if (securityRepository.existsByLogin(requestDto.getLogin())) {
-            throw new ExistingUserException(requestDto.getLogin());
+            throw new ExistingUserLoginException(requestDto.getLogin());
+        }
+
+        if (userRepository.existsByUsername(requestDto.getUsername())) {
+            throw new ExistingUsernameException(requestDto.getUsername());
         }
 
         User user = User.builder()
@@ -95,7 +99,7 @@ public class SecurityServiceImpl implements SecurityService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Optional<UpdateSecurityResponseDto> updateSecurity(UpdateSecurityRequestDto requestDto) {
+    public Optional<UpdateSecurityResponseDto> updateSecurity(UpdateSecurityRequestDto requestDto) throws ExistingUserLoginException {
         if (!authUtil.canAccessSecurityByLogin(requestDto.getCurrentLogin())) {
             throw new AccessDeniedException("Access denied, username: " + requestDto.getCurrentLogin());
         }
@@ -107,7 +111,7 @@ public class SecurityServiceImpl implements SecurityService {
 
         if (requestDto.getNewLogin() != null && !requestDto.getNewLogin().equals(securityOptional.get().getLogin())) {
             if (securityRepository.existsByLogin(requestDto.getNewLogin())) {
-                throw new LoginUsedException(requestDto.getNewLogin());
+                throw new ExistingUserLoginException(requestDto.getNewLogin());
             }
             securityOptional.get().setLogin(requestDto.getNewLogin());
         }

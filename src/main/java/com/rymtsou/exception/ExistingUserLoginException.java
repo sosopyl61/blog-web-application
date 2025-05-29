@@ -1,9 +1,9 @@
 package com.rymtsou.exception;
 
-public class ExistingUserException extends Exception {
+public class ExistingUserLoginException extends Exception {
     String login;
 
-    public ExistingUserException(String login) {
+    public ExistingUserLoginException(String login) {
         super("Login is already used: " + login);
     }
 

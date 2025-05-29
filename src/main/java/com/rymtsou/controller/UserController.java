@@ -1,12 +1,18 @@
 package com.rymtsou.controller;
 
 import com.rymtsou.model.domain.User;
-import com.rymtsou.model.request.DeleteByIdRequestDto;
-import com.rymtsou.model.request.FindUserRequestDto;
 import com.rymtsou.model.request.UpdateUserRequestDto;
 import com.rymtsou.model.response.GetUserResponseDto;
+import com.rymtsou.model.response.GetUsersResponseDto;
 import com.rymtsou.service.UserService;
 import com.rymtsou.service.impl.UserServiceImpl;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,8 +37,15 @@ public class UserController {
         this.userService = userService;
     }
 
+    @Operation(summary = "Get user by id",
+            description = "Getting user by his/her id.")
+    @ApiResponses(value = {
+            @ApiResponse(description = "User was received.", responseCode = "200",
+                    content = @Content(schema = @Schema(implementation = User.class))),
+            @ApiResponse(description = "User was not found.", responseCode = "404", content = @Content)
+    })
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<User> getUserById(@PathVariable @Parameter(description = "User's id") Long id) {
         Optional<User> user = userService.getUserById(id);
         if (user.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -40,36 +53,63 @@ public class UserController {
         return new ResponseEntity<>(user.get(), HttpStatus.OK);
     }
 
-    @GetMapping("/find")
-    public ResponseEntity<GetUserResponseDto> getUserByUsername(@RequestBody FindUserRequestDto dto) {
-        Optional<GetUserResponseDto> user = userService.getUserByUsername(dto);
+    @Operation(summary = "Get user by username",
+            description = "Getting user by his/her username.")
+    @ApiResponses(value = {
+            @ApiResponse(description = "User was received.", responseCode = "200",
+                    content = @Content(schema = @Schema(implementation = GetUserResponseDto.class))),
+            @ApiResponse(description = "User was not found.", responseCode = "404", content = @Content)
+    })
+    @GetMapping("/find/{username}")
+    public ResponseEntity<GetUserResponseDto> getUserByUsername(@PathVariable @Parameter(description = "User's username") String username) {
+        Optional<GetUserResponseDto> user = userService.getUserByUsername(username);
         if (user.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(user.get(), HttpStatus.OK);
     }
 
+    @Operation(summary = "Find all users",
+            description = "Getting all users in the app.")
+    @ApiResponses(value = {
+            @ApiResponse(description = "Users were received.", responseCode = "200",
+                    content = @Content(schema = @Schema(implementation = GetUsersResponseDto.class))),
+            @ApiResponse(description = "Users were not found.", responseCode = "404", content = @Content)
+    })
     @GetMapping("/find/all")
-    public ResponseEntity<List<GetUserResponseDto>> getAllUsers() {
-        Optional<List<GetUserResponseDto>> users = userService.getAllUsers();
+    public ResponseEntity<List<GetUsersResponseDto>> getAllUsers() {
+        Optional<List<GetUsersResponseDto>> users = userService.getAllUsers();
         if (users.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(users.get(), HttpStatus.OK);
     }
 
+    @Operation(summary = "Edit user",
+            description = "Editing user information by his/her id.")
+    @ApiResponses(value = {
+            @ApiResponse(description = "User was updated.", responseCode = "200",
+                    content = @Content(schema = @Schema(implementation = GetUsersResponseDto.class))),
+            @ApiResponse(description = "Users updating was failed.", responseCode = "409", content = @Content)
+    })
     @PutMapping
-    public ResponseEntity<GetUserResponseDto> updateUser(@RequestBody UpdateUserRequestDto dto) {
-        Optional<GetUserResponseDto> userResponse = userService.updateUser(dto);
+    public ResponseEntity<GetUsersResponseDto> updateUser(@RequestBody @Valid UpdateUserRequestDto dto) {
+        Optional<GetUsersResponseDto> userResponse = userService.updateUser(dto);
         if (userResponse.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
         return new ResponseEntity<>(userResponse.get(), HttpStatus.OK);
     }
 
-    @DeleteMapping
-    public ResponseEntity<HttpStatus> deleteUser(@RequestBody DeleteByIdRequestDto dto) {
-        Boolean result = userService.deleteUser(dto);
+    @Operation(summary = "Delete user",
+            description = "Deleting user by his/her id.")
+    @ApiResponses(value = {
+            @ApiResponse(description = "User was deleted.", responseCode = "204", content = @Content),
+            @ApiResponse(description = "Users deleting was failed.", responseCode = "409", content = @Content)
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<HttpStatus> deleteUser(@PathVariable @Parameter(description = "User's id.") Long id) {
+        Boolean result = userService.deleteUser(id);
         if (!result) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
