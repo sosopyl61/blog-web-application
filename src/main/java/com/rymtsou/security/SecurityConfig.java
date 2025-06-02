@@ -1,5 +1,7 @@
 package com.rymtsou.security;
 
+import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
+import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,6 +15,12 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
+@SecurityScheme(
+        name = "JWT",
+        type = SecuritySchemeType.HTTP,
+        bearerFormat = "JWT",
+        scheme = "bearer"
+)
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
@@ -34,7 +42,8 @@ public class SecurityConfig {
                                         "/v3/api-docs",
                                         "/v3/api-docs/**",
                                         "/swagger-resources/**",
-                                        "/webjars/**"
+                                        "/webjars/**",
+                                        "/api/**"
                                 )/*.hasRole("ADMIN")*/.permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "/users/**").hasAnyRole("USER", "ADMIN")
                                 .requestMatchers(HttpMethod.POST, "/registration").permitAll()
